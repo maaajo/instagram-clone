@@ -2,8 +2,9 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { FirebaseContext } from '../context/firebase';
 import * as ROUTES from '../constants/routes';
+import { doesUsernameExist } from '../services/firebase';
 
-const Login = () => {
+const SignUp = () => {
   const history = useHistory();
   const { firebase } = useContext(FirebaseContext);
 
@@ -12,13 +13,45 @@ const Login = () => {
   const [emailAddress, setEmailAddress] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const isInvalid = password === '' || emailAddress === '';
+  const isInvalid =
+    password === '' ||
+    emailAddress === '' ||
+    username === '' ||
+    fullName === '';
 
   const handleSignUp = async e => {
     e.preventDefault();
 
-    try {
-    } catch (error) {}
+    const usernameExist = await doesUsernameExist(username);
+
+    if (usernameExist) {
+      try {
+        const createdUserResult = firebase
+          .auth()
+          .createUserWithEmailAndPassword(emailAddress, password);
+
+        await createdUserResult.user.updateProfile({
+          displayName: username
+        });
+
+        await firebase
+          .firestore()
+          .collection('users')
+          .add({
+            userId: createdUserResult.user.uid,
+            username: username.toLowerCase(),
+            fullName,
+            emailAddress: emailAddress.toLowerCase(),
+            following: [],
+            followers: [],
+            dateCreated: Date.now()
+          });
+
+        history.push(ROUTES.DASHBOARD);
+      } catch (error) {
+        setError(error.message);
+      }
+    }
   };
 
   useEffect(() => {
@@ -45,6 +78,22 @@ const Login = () => {
           {error && <p className="mb-5 text-xs text-red-primary">{error}</p>}
           <form onSubmit={handleSignUp} method="POST">
             <input
+              aria-label="Enter your username"
+              type="text"
+              placeholder="Username"
+              className="input-login"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+            <input
+              aria-label="Enter your full name"
+              type="text"
+              placeholder="Full name"
+              className="input-login"
+              value={fullName}
+              onChange={({ target }) => setFullName(target.value)}
+            />
+            <input
               aria-label="Enter your email address"
               type="email"
               placeholder="Email address"
@@ -66,15 +115,15 @@ const Login = () => {
               className={`bg-blue-medium text-white w-full rounded h-8 font-bold ${isInvalid &&
                 `opacity-50`}`}
             >
-              Log In
+              Sign Up
             </button>
           </form>
         </div>
         <div className="flex justify-center items-center flex-col w-full rounded bg-white p-4 border border-gray-primary">
           <p className="text-sm">
-            {`Don't have an account? `}
-            <Link to="/signup" className="font-bold text-blue-medium">
-              Sign up
+            {`Already have an account? `}
+            <Link to={ROUTES.LOGIN} className="font-bold text-blue-medium">
+              Log in
             </Link>
           </p>
         </div>
@@ -83,4 +132,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;
