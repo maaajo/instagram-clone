@@ -26,7 +26,7 @@ const SignUp = () => {
 
     if (usernameExist.length === 0) {
       try {
-        const createdUserResult = firebase
+        const createdUserResult = await firebase
           .auth()
           .createUserWithEmailAndPassword(emailAddress, password);
 
