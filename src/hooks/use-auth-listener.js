@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from 'react-dom/cjs/react-dom.development';
-import FirebaseContext from '../context/firebase';
+import { useState, useEffect, useContext } from 'react';
+import { FirebaseContext } from '../context/firebase';
 
 export default function useAuthListener() {
   const [user, setUser] = useState(
