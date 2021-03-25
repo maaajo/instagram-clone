@@ -11,4 +11,8 @@ body {
   .input-login {
     @apply text-sm text-gray-base w-full mr-3 py-5 px-4 h-2 border border-gray-primary rounded mb-2 focus:ring-2 focus:ring-blue-medium;
   }
+
+  .header-icon {
+    @apply w-8 mr-6 text-black-light cursor-pointer;
+  }
 }
