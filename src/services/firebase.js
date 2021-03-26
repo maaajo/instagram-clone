@@ -11,3 +11,18 @@ export async function doesUsernameExist(username) {
     return user.data().username.length > 0;
   });
 }
+
+export async function getUserByUserId(uid) {
+  const result = firebase
+    .firestore()
+    .collection('users')
+    .where('username', '===', uid)
+    .get();
+
+  const user = result.docs.map(item => ({
+    ...item.data(),
+    docId: item.id
+  }));
+
+  return user;
+}
