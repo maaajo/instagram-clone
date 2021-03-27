@@ -8,8 +8,8 @@ export default function Sidebar() {
 
   return (
     <div className="p-4">
-      <User />
-      <Suggestions />
+      <User username={user.username} fullName={user.fullName} />
+      <Suggestions userId={user.userId} />
     </div>
   );
 }
