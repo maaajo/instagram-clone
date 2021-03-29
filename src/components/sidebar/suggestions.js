@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Skeleton from 'react-loading-skeleton';
 import { getSuggestedProfiles } from '../../services/firebase';
+import SuggestedProfile from './suggestedProfile';
 
-export default function Suggestions({ userId, following }) {
+export default function Suggestions({ userId, following, loggedUserDocId }) {
   const [profiles, setProfiles] = useState(null);
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function Suggestions({ userId, following }) {
             username={username}
             profileId={profileUserId}
             userId={userId}
+            loggedUserDocId={loggedUserDocId}
           />
         ))}
       </div>
@@ -41,5 +43,6 @@ export default function Suggestions({ userId, following }) {
 
 Suggestions.propTypes = {
   userId: PropTypes.string,
-  following: PropTypes.array
+  following: PropTypes.array,
+  loggedUserDocId: PropTypes.string
 };
