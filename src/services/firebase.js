@@ -71,3 +71,53 @@ export async function updateUserFollowers(docId, uidToFollow, isFollowing) {
         : FieldValue.arrayUnion(uidToFollow)
     });
 }
+
+export async function getPhotos(userId, following) {
+  const result = await firebase
+    .firestore()
+    .collection('photos')
+    .where('userId', 'in', following)
+    .get();
+
+  const userFollowedPhotos = result.docs.map(doc => ({
+    ...doc.data(),
+    docId: doc.id
+  }));
+
+  const photosWithUserDetails = await Promise.all(
+    userFollowedPhotos.map(async photo => {
+      let isUserLikingPhoto = false;
+      if (photo.likes.includes(userId)) {
+        isUserLikingPhoto = true;
+      }
+
+      const user = await getUserByUserId(photo.userId);
+      const { username } = user[0];
+      return { ...photo, username, isUserLikingPhoto };
+    })
+  );
+
+  return photosWithUserDetails;
+}
+
+export async function likePhoto({ docId, toggleLiked, userId }) {
+  await firebase
+    .firestore()
+    .collection('photos')
+    .doc(docId)
+    .update({
+      likes: toggleLiked
+        ? FieldValue.arrayRemove(userId)
+        : FieldValue.arrayUnion(userId)
+    });
+}
+
+export function addComment({ docId, comment }) {
+  return firebase
+    .firestore()
+    .collection('photos')
+    .doc(docId)
+    .update({
+      comments: FieldValue.arrayUnion({ ...comment })
+    });
+}
