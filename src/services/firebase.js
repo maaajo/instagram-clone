@@ -121,3 +121,60 @@ export function addComment({ docId, comment }) {
       comments: FieldValue.arrayUnion({ ...comment })
     });
 }
+
+export async function getUserByUsername(username) {
+  const result = await firebase
+    .firestore()
+    .collection('users')
+    .where('username', '==', username)
+    .get();
+
+  return result.docs.map(item => ({
+    ...item.data(),
+    docId: item.id
+  }));
+}
+
+export async function getUserPhotos(userId) {
+  const result = await firebase
+    .firestore()
+    .collection('photos')
+    .where('userId', '==', userId)
+    .get();
+
+  return result.docs.map(item => ({
+    ...item.data(),
+    docId: item.id
+  }));
+}
+
+export async function isUserFollowingProfile(loggedInUserUsername, userId) {
+  const result = await firebase
+    .firestore()
+    .collection('users')
+    .where('username', '==', loggedInUserUsername)
+    .where('following', 'array-contains', userId)
+    .get();
+
+  const [response = {}] = result.docs.map(item => ({
+    ...item.data(),
+    docId: item.id
+  }));
+
+  return response.userId;
+}
+
+export async function toggleFollow({
+  isFollowingUser,
+  activeUserDocId,
+  profileDocId,
+  profileUserId,
+  followingUserId
+}) {
+  await updateLoggedInUserFollowing(
+    activeUserDocId,
+    profileUserId,
+    isFollowingUser
+  );
+  await updateUserFollowers(profileDocId, followingUserId, isFollowingUser);
+}
